@@ -1,11 +1,3 @@
-/* Blink Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include <stdio.h>
 #include "driver/gpio.h"
 #include "driver/gptimer.h"
@@ -13,7 +5,7 @@
 
 #define LED1_GPIO   (18)
 #define LED2_GPIO   (19)
-#define SYSTEM_FREQUENCY    (40000000U)
+#define SYSTEM_FREQUENCY    (40000000U) //40mhz
 #define MSEC_TO_TICK(ms)        (ms * (SYSTEM_FREQUENCY / 1000))
 #define GET_CURRENT_TIMER_TICK  (gptimer_get_raw_count(gptimer, &current_tick)) 
 
@@ -23,13 +15,26 @@ static blink_fp_api_t blink_fp_api;
 static uint64_t current_tick = 0;
 
 
-
+/**
+ * @fn get_current_tick
+ * @brief Retrieve the current hardware timer tick count.
+ * Queries the configured GPTimer and returns its raw count value as a 32-bit tick.
+ * @return Current hardware timer tick count.
+ */
 static uint32_t get_current_tick(void)
 {
     GET_CURRENT_TIMER_TICK;
     return (uint32_t)current_tick;
 }
 
+/**
+ * @fn tick_elapsed
+ * @brief Compute elapsed ticks between two timer readings.
+ * Calculates the difference between a start and end tick, handling wrap-around.
+ * @param start  The tick count at the beginning of the interval.
+ * @param end    The tick count at the end of the interval.
+ * @return Number of ticks elapsed between start and end.
+ */
 static uint32_t tick_elapsed(uint32_t start, uint32_t end)
 {
     uint32_t diff = 0;
@@ -44,6 +49,13 @@ static uint32_t tick_elapsed(uint32_t start, uint32_t end)
     return diff;
 }
 
+/**
+ * @fn set_blink_callback
+ * @brief Drive the output GPIO based on blink state.
+ * User-provided callback invoked by the blink driver to set the GPIO level.
+ * @param param  Pointer to a uint8_t holding the GPIO number.
+ * @param onoff  Desired output level: 1 = ON (HIGH), 0 = OFF (LOW).
+ */
 static void set_blink_callback(void * const param, uint8_t onoff)
 {
     uint8_t pin = *(uint8_t*)param;
@@ -83,7 +95,7 @@ void app_main(void)
     system_initialize();
 
     static uint8_t blink_io[2] = {LED1_GPIO, LED2_GPIO};
-    blink_set((void *)&blink_io[0], 100, 0, 200, 0);
+    blink_set((void *)&blink_io[0], 100, 100, 200, 0);
     blink_set((void *)&blink_io[1], 100, 0, 200, 1000);
     while (1) 
     {
